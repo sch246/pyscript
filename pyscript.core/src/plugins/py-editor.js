@@ -21,6 +21,12 @@ const hooks = {
     },
 };
 
+function cleanErrorMessage(msg) {
+    return msg.replace(
+        /^Traceback \(most recent call last\):\n[\s\S]*? {2}File "<exec>"/,
+        `Traceback (most recent call last):\n  File "<exec>"`);
+}
+
 async function execute({ currentTarget }) {
     const { env, pySrc, outDiv } = this;
 
@@ -60,7 +66,8 @@ async function execute({ currentTarget }) {
             outDiv.innerText += `${str}\n`;
         };
         sync.writeErr = (str) => {
-            outDiv.innerHTML += `<span style='color:red'>${str}</span>\n`;
+            let errMsg = cleanErrorMessage(str.message)
+            outDiv.innerHTML += `<span style='color:red'>${errMsg}</span>\n`;
         };
         sync.runAsync(pySrc).then(enable, enable);
     });
